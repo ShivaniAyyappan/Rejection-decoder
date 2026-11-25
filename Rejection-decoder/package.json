@@ -1,0 +1,7 @@
+{
+  "name": "rejection-decoder",
+  "version": "1.0.0",
+  "description": "Explains scholarship rejection and defect notices in plain language, grounded in a hand-checked reason library.",
+  "private": true,
+  "engines": { "node": ">=18" }
+}
