@@ -1,162 +1,306 @@
 (function () {
   'use strict';
-  var L = window.RejectionLogic;
-  var SAMPLES = [
-    "Status: Defective. Remark by Institute Nodal Officer: Income certificate uploaded is expired. Please upload a valid income certificate issued by the competent authority.",
-    "Status: Defective. Remark: Name of applicant in Aadhaar does not match with name in marksheet. Details mismatch.",
-    "Status: Rejected. Remark: Application not recommended."
-  ];
-  var TIMEOUT_MS = 20000;
 
-  var notice = document.getElementById('notice');
-  var lang = document.getElementById('lang');
-  var go = document.getElementById('go');
-  var count = document.getElementById('count');
-  var result = document.getElementById('result');
-  var live = result.parentNode;
-  var cache = new Map();   // repeat questions cost nothing
+  var L = window.RejectionLogic;
+  if (!L) return;
+
+  var SAMPLES = {
+    income:
+      'Status: Defective. Remark by Institute Nodal Officer: Income certificate uploaded is expired. Please upload a valid income certificate issued by the competent authority.',
+    name:
+      'Status: Defective. Remark: Name of applicant in Aadhaar does not match with name in marksheet. Details mismatch.',
+    unclear: 'Status: Rejected. Remark: Application not recommended.',
+    bank:
+      'Status: Payment failed. Remark: Beneficiary bank account is not seeded with NPCI / DBT mapper or account details mismatch.'
+  };
+
+  var TIMEOUT_MS = 20000;
+  var MAX_CACHE_SIZE = 100;
+
+  var noticeEl = document.getElementById('noticeInput');
+  var langEl = document.getElementById('langSelect');
+  var goBtn = document.getElementById('explainBtn');
+  var clearBtn = document.getElementById('clearBtn');
+  var copyBtn = document.getElementById('copyBtn');
+  var countEl = document.getElementById('charCount');
+  var resultEl = document.getElementById('outputContainer');
+  var headingEl = document.getElementById('outputHeading');
+  var maskedBannerEl = document.getElementById('maskedBanner');
+
+  if (!noticeEl || !langEl || !goBtn || !resultEl) return;
+
+  var cache = new Map();
   var inflight = null;
 
-  function el(tag, cls, text) {
-    var e = document.createElement(tag);
-    if (cls) e.className = cls;
-    if (text != null) e.textContent = text;
-    return e;
+  function setCache(key, value) {
+    if (cache.has(key)) cache.delete(key);
+    cache.set(key, value);
+    if (cache.size > MAX_CACHE_SIZE) {
+      var oldestKey = cache.keys().next().value;
+      cache.delete(oldestKey);
+    }
   }
-  function section(title) {
-    var s = el('div', 'sec');
-    s.appendChild(el('h3', null, title));
-    return s;
+
+  function el(tag, cls, text) {
+    var node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text != null) node.textContent = text;
+    return node;
+  }
+
+  function createBlock(title, accentPink) {
+    var box = el('div', accentPink ? 'preview-item accent-pink' : 'preview-item');
+    var heading = el('h3');
+    heading.appendChild(el('span', accentPink ? 'dot pink' : 'dot'));
+    heading.appendChild(document.createTextNode(' ' + title));
+    box.appendChild(heading);
+    return box;
   }
 
   function updateCount() {
-    var n = notice.value.length;
-    count.textContent = n + ' / ' + L.MAX_LEN;
-    count.className = n >= L.MAX_LEN ? 'over' : '';
-  }
-  notice.addEventListener('input', updateCount);
-
-  document.querySelectorAll('.chip').forEach(function (b) {
-    b.addEventListener('click', function () { notice.value = SAMPLES[+b.dataset.s]; updateCount(); notice.focus(); });
-  });
-
-  function busy(on) {
-    go.disabled = on;
-    go.textContent = on ? 'Reading your notice...' : 'Explain my notice';
-    live.setAttribute('aria-busy', on ? 'true' : 'false');
+    var len = noticeEl.value.length;
+    if (countEl) {
+      countEl.textContent = len + ' / ' + L.MAX_LEN;
+      countEl.classList.toggle('over', len >= L.MAX_LEN);
+    }
   }
 
-  function showLoading() {
-    result.textContent = '';
-    var s = el('div', 'skeleton');
-    s.setAttribute('aria-hidden', 'true');
-    for (var i = 0; i < 4; i++) s.appendChild(el('span'));
-    result.appendChild(s);
+  function setBusy(isBusy) {
+    goBtn.disabled = isBusy;
+    goBtn.textContent = isBusy ? 'Reading your notice...' : 'Explain my notice ->';
+    resultEl.setAttribute('aria-busy', isBusy ? 'true' : 'false');
   }
 
-  function fail(msg) {
-    result.textContent = '';
-    result.appendChild(el('p', 'err', msg));
-    result.focus();
+  function setMaskedBanner(count) {
+    if (!maskedBannerEl) return;
+    if (count > 0) {
+      maskedBannerEl.textContent =
+        'Local privacy filter hid ' +
+        count +
+        ' sensitive number' +
+        (count > 1 ? 's' : '') +
+        ' on your device before sending.';
+      maskedBannerEl.classList.add('visible');
+    } else {
+      maskedBannerEl.textContent = '';
+      maskedBannerEl.classList.remove('visible');
+    }
   }
 
-  function show(raw, redactedCount) {
-    var d = L.normalizeResponse(raw);
-    var tone = 'tone-' + L.statusTone(d.status, d.matched);
-    result.textContent = '';
+  function showError(message) {
+    if (headingEl) headingEl.textContent = 'Check Your Input';
+    resultEl.textContent = '';
+    var errBox = createBlock('Notice error', true);
+    errBox.appendChild(el('p', 'err-text', message));
+    resultEl.appendChild(errBox);
+  }
 
-    if (redactedCount > 0) {
-      result.appendChild(el('div', 'flag', redactedCount + ' personal number' + (redactedCount > 1 ? 's were' : ' was') + ' hidden before sending.'));
+  function renderResult(rawPayload, redactedCount) {
+    var d = L.normalizeResponse(rawPayload);
+    var toneClass = 'tone-' + L.statusTone(d.status, d.matched);
+
+    setMaskedBanner(redactedCount);
+    if (headingEl) {
+      headingEl.textContent = d.title + (langEl.value && langEl.value !== 'English' ? ' (' + langEl.value + ')' : '');
     }
 
-    if (d.note) result.appendChild(el('div', 'flag', d.note));
+    resultEl.textContent = '';
 
-    var bar = el('div', 'stampbar');
-    bar.appendChild(el('span', 'stamp ' + tone, d.status));
-    if (d.matched && d.confidence) bar.appendChild(el('span', 'conf', 'Match confidence: ' + d.confidence));
-    result.appendChild(bar);
-    result.appendChild(el('h2', 'title', d.title));
+    var statusRow = el('div', 'status-strip');
+    statusRow.appendChild(el('span', 'stamp ' + toneClass, d.status));
+    if (d.matched && d.confidence) {
+      statusRow.appendChild(el('span', 'conf-pill', 'Confidence: ' + d.confidence));
+    }
+    if (d.note) {
+      statusRow.appendChild(el('span', 'note-pill', d.note));
+    }
+    resultEl.appendChild(statusRow);
 
     if (d.explanation) {
-      var a = section('What it means');
-      a.appendChild(el('p', null, d.explanation));
-      result.appendChild(a);
+      var meaningBlock = createBlock('Plain-Language Meaning', true);
+      meaningBlock.appendChild(el('p', null, d.explanation));
+      resultEl.appendChild(meaningBlock);
     }
-    if (d.fix_steps.length) {
-      var b = section('What to do');
-      var ol = el('ol', 'steps');
-      d.fix_steps.forEach(function (s) { ol.appendChild(el('li', null, s)); });
-      b.appendChild(ol);
-      result.appendChild(b);
+
+    if (d.fix_steps.length > 0) {
+      var stepsBlock = createBlock('Practical Fix Checklist', false);
+      var list = el('ol', 'steps-list');
+      for (var i = 0; i < d.fix_steps.length; i++) {
+        list.appendChild(el('li', null, d.fix_steps[i]));
+      }
+      stepsBlock.appendChild(list);
+      resultEl.appendChild(stepsBlock);
     }
-    if (d.route) {
-      var c = section('Where to go');
-      c.appendChild(el('p', null, d.route + ' Contact: ' + d.contact + '.'));
-      result.appendChild(c);
+
+    if (d.route || d.contact) {
+      var contactBlock = createBlock('Who to Contact', true);
+      var contactText = d.route ? d.route + ' Contact: ' + d.contact + '.' : 'Contact: ' + d.contact + '.';
+      contactBlock.appendChild(el('p', null, contactText));
+      resultEl.appendChild(contactBlock);
     }
+
     if (d.letter) {
-      var l = section('Draft letter (edit before sending)');
-      var pre = el('div', 'letter', d.letter);
-      l.appendChild(pre);
-      var btn = el('button', 'copy', 'Copy letter');
-      btn.type = 'button';
-      btn.addEventListener('click', function () {
-        var done = function (t) { btn.textContent = t; setTimeout(function () { btn.textContent = 'Copy letter'; }, 1800); };
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(d.letter).then(function () { done('Copied'); }, function () { done('Copy failed. Select the text instead.'); });
-        } else { done('Select the text and copy it.'); }
-      });
-      l.appendChild(btn);
-      result.appendChild(l);
+      var letterBlock = createBlock('Draft Letter (Edit Before Sending)', false);
+      letterBlock.appendChild(el('pre', 'draft-letter', d.letter));
+      resultEl.appendChild(letterBlock);
     }
+
     if (d.official_link) {
-      var n = el('div', 'notice');
-      n.appendChild(document.createTextNode('Check the official source before acting: '));
-      var link = el('a', null, d.official_link);
-      link.href = d.official_link; link.target = '_blank'; link.rel = 'noopener noreferrer';
-      n.appendChild(link);
-      result.appendChild(n);
+      var linkBlock = createBlock('Official Portal Reference', false);
+      var anchor = el('a', 'official-link', d.official_link);
+      anchor.href = d.official_link;
+      anchor.target = '_blank';
+      anchor.rel = 'noopener noreferrer';
+      linkBlock.appendChild(anchor);
+      resultEl.appendChild(linkBlock);
     }
-    result.focus();
   }
 
-  go.addEventListener('click', function () {
-    var v = L.validateNotice(notice.value);
-    if (!v.ok) { fail(v.error); return; }
+  function handleDecode() {
+    var validation = L.validateNotice(noticeEl.value);
+    if (!validation.ok) {
+      showError(validation.error);
+      return;
+    }
 
-    var red = L.redactPII(v.text);
-    var key = L.cacheKey(red.text, lang.value);
-    if (cache.has(key)) { show(cache.get(key), red.count); return; }
+    var redacted = L.redactPII(validation.text);
+    var key = L.cacheKey(redacted.text, langEl.value);
 
-    if (inflight) inflight.abort();
-    var ctrl = new AbortController();
-    inflight = ctrl;
-    var timer = setTimeout(function () { ctrl.abort(); }, TIMEOUT_MS);
-    busy(true); showLoading();
+    if (cache.has(key)) {
+      renderResult(cache.get(key), redacted.count);
+      return;
+    }
+
+    if (inflight) {
+      inflight.controller.abort();
+      clearTimeout(inflight.timer);
+    }
+
+    var controller = new AbortController();
+    var timer = setTimeout(function () {
+      controller.abort();
+    }, TIMEOUT_MS);
+    inflight = { controller: controller, timer: timer };
+
+    setBusy(true);
+    setMaskedBanner(redacted.count);
+    if (headingEl) headingEl.textContent = 'Analyzing Notice...';
+    resultEl.textContent = '';
+    var loadingBox = createBlock('Reading your notice', true);
+    loadingBox.appendChild(el('p', null, 'Checking status patterns and preparing guidance...'));
+    resultEl.appendChild(loadingBox);
 
     fetch('/api/decode', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ notice: red.text, language: lang.value }),
-      signal: ctrl.signal
+      body: JSON.stringify({ notice: redacted.text, language: langEl.value }),
+      signal: controller.signal
     })
-      .then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
-      .then(function (x) {
-        if (!x.ok) { fail((x.j && x.j.error) || 'Something went wrong. Try again in a moment.'); return; }
-        cache.set(key, x.j);
-        show(x.j, red.count);
+      .then(function (res) {
+        return res.json().then(function (data) {
+          return { ok: res.ok, data: data };
+        });
       })
-      .catch(function (e) {
-        if (inflight !== ctrl) return; // superseded by a newer request
-        fail(e && e.name === 'AbortError'
-          ? 'The server took too long to answer. Try again.'
-          : 'Could not reach the server. Check your connection and try again.');
+      .then(function (payload) {
+        if (!payload.ok) {
+          showError((payload.data && payload.data.error) || 'Could not decode this notice right now.');
+          return;
+        }
+        setCache(key, payload.data);
+        renderResult(payload.data, redacted.count);
       })
-      .finally(function () { clearTimeout(timer); if (inflight === ctrl) { inflight = null; busy(false); } });
+      .catch(function (err) {
+        if (!inflight || inflight.controller !== controller) return;
+        showError(
+          err && err.name === 'AbortError'
+            ? 'The request timed out. Please try again.'
+            : 'Unable to reach the server. Check your connection and try again.'
+        );
+      })
+      .finally(function () {
+        clearTimeout(timer);
+        if (inflight && inflight.controller === controller) {
+          inflight = null;
+          setBusy(false);
+        }
+      });
+  }
+
+  noticeEl.addEventListener('input', updateCount);
+  noticeEl.addEventListener('keydown', function (e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      handleDecode();
+    }
   });
 
-  notice.addEventListener('keydown', function (e) {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') go.click();
+  goBtn.addEventListener('click', handleDecode);
+
+  if (clearBtn) {
+    clearBtn.addEventListener('click', function () {
+      if (inflight) {
+        inflight.controller.abort();
+        clearTimeout(inflight.timer);
+        inflight = null;
+        setBusy(false);
+      }
+      noticeEl.value = '';
+      updateCount();
+      setMaskedBanner(0);
+      document.querySelectorAll('.chip').forEach(function (chip) {
+        chip.classList.remove('active');
+      });
+      if (headingEl) headingEl.textContent = 'What You Will Get';
+      resultEl.textContent = '';
+      var m1 = createBlock('Plain-Language Meaning', true);
+      m1.appendChild(el('p', null, 'Translates portal status labels and verification remarks into clear, everyday terms.'));
+      var m2 = createBlock('Practical Fix Checklist', false);
+      var ul = el('ul');
+      ul.appendChild(el('li', null, 'Check which document, field, or bank detail was flagged.'));
+      ul.appendChild(el('li', null, 'Prepare a clear, valid replacement or correction before the portal window closes.'));
+      m2.appendChild(ul);
+      var m3 = createBlock('Who to Contact', true);
+      m3.appendChild(el('p', null, 'Shows whether to start with your institute nodal officer, verifier, or portal helpdesk.'));
+      resultEl.appendChild(m1);
+      resultEl.appendChild(m2);
+      resultEl.appendChild(m3);
+    });
+  }
+
+  document.querySelectorAll('.chip[data-sample]').forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      var sampleKey = chip.getAttribute('data-sample');
+      var text = SAMPLES[sampleKey];
+      if (!text) return;
+      document.querySelectorAll('.chip').forEach(function (c) {
+        c.classList.toggle('active', c.getAttribute('data-sample') === sampleKey);
+      });
+      noticeEl.value = text;
+      updateCount();
+      noticeEl.focus();
+    });
   });
+
+  if (copyBtn) {
+    copyBtn.addEventListener('click', function () {
+      var summary = (resultEl.innerText || '').trim();
+      if (!summary) return;
+      var finish = function (label) {
+        var prev = copyBtn.textContent;
+        copyBtn.textContent = label;
+        setTimeout(function () {
+          copyBtn.textContent = prev;
+        }, 1600);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(summary).then(
+          function () { finish('Copied'); },
+          function () { finish('Select text to copy'); }
+        );
+      } else {
+        finish('Select text to copy');
+      }
+    });
+  }
+
   updateCount();
 })();
