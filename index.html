@@ -51,7 +51,6 @@
       flex-direction: column;
     }
 
-    /* Top Navy Header & Hero Band */
     .top-band {
       background: linear-gradient(135deg, var(--navy-950) 0%, var(--navy-900) 60%, var(--navy-800) 100%);
       color: var(--white);
@@ -163,7 +162,6 @@
       max-width: 660px;
     }
 
-    /* Main Workspace Grid */
     .workspace {
       max-width: 1200px;
       width: 100%;
@@ -289,7 +287,6 @@
       margin-top: 0.35rem;
     }
 
-    /* Example Chips */
     .examples-box {
       background: var(--navy-50);
       border: 1px solid var(--navy-100);
@@ -345,7 +342,6 @@
       border-color: var(--pink-500);
     }
 
-    /* Inline Controls Row */
     .action-row {
       display: grid;
       grid-template-columns: 165px 1fr;
@@ -411,7 +407,6 @@
       border-left: 3px solid var(--pink-500);
     }
 
-    /* Output Card */
     .preview-stack {
       display: flex;
       flex-direction: column;
@@ -492,7 +487,6 @@
       color: var(--navy-800);
     }
 
-    /* Quick Reference Strip */
     .quick-strip {
       max-width: 1200px;
       width: 100%;
@@ -538,7 +532,6 @@
       gap: 0.5rem;
     }
 
-    /* Footer */
     footer {
       margin-top: auto;
       background: var(--navy-950);
@@ -592,7 +585,6 @@
   </div>
 
   <main class="workspace">
-    <!-- Left Column: Input -->
     <section class="card" aria-label="Notice Input">
       <div class="card-header">
         <div class="step-title">
@@ -644,12 +636,11 @@
 
         <div class="privacy-note">
           <span>🛡️</span>
-          <span>Aadhaar, phone numbers, emails, and long account numbers are masked on your device before processing.</span>
+          <span>IDs, phone numbers, emails, and long account numbers are masked on your device before processing.</span>
         </div>
       </div>
     </section>
 
-    <!-- Right Column: Explanation & Action Plan -->
     <section class="card" aria-label="Decoded Explanation">
       <div class="card-header">
         <div class="step-title">
@@ -698,7 +689,7 @@
       <div class="quick-pills">
         <button type="button" class="chip" data-sample="income">Expired income certificate</button>
         <button type="button" class="chip" data-sample="name">Applicant name mismatch</button>
-        <button type="button" class="chip" data-sample="bank">Aadhaar seeding pending</button>
+        <button type="button" class="chip" data-sample="bank">Aadhaar/ID seeding pending</button>
         <button type="button" class="chip" data-sample="unclear">Generic / incomplete remark</button>
       </div>
     </div>
@@ -713,14 +704,10 @@
 
   <script>
     const SAMPLES = {
-      income: "Status: Marked Defective by Verifier
-Remark: Income certificate validity expired or issued by unauthorized authority. Upload valid certificate.",
-      name: "Status: Defective / Re-submit Required
-Remark: Applicant name on application does not match Aadhaar / mark sheet records.",
-      unclear: "Status: Rejected / Defective
-Remark: Verification failed due to discrepancy in submitted details. Contact concerned authority.",
-      bank: "Status: Payment / Verification Hold
-Remark: Beneficiary bank account is not seeded with NPCI / DBT mapper or account details mismatch."
+      income: "Status: Marked Defective by Verifier\nRemark: Income certificate validity expired or issued by unauthorized authority. Upload valid certificate.",
+      name: "Status: Defective / Re-submit Required\nRemark: Applicant name on application does not match ID / mark sheet records.",
+      unclear: "Status: Rejected / Defective\nRemark: Verification failed due to discrepancy in submitted details. Contact concerned authority.",
+      bank: "Status: Payment / Verification Hold\nRemark: Beneficiary bank account is not seeded with NPCI / DBT mapper or account details mismatch."
     };
 
     const GUIDES = {
@@ -736,7 +723,7 @@ Remark: Beneficiary bank account is not seeded with NPCI / DBT mapper or account
       },
       name: {
         title: "Name Mismatch Across Records",
-        meaning: "Your name spelling, initials, or name order differs between your scholarship form, ID/Aadhaar, or academic certificates.",
+        meaning: "Your name spelling, initials, or name order differs between your scholarship form, ID proof, or academic certificates.",
         steps: [
           "Compare every character and initial of your name across your application form, ID proof, and mark sheets.",
           "Follow the portal's specific rule for minor spelling differences vs. major name changes or supporting documents.",
@@ -781,22 +768,22 @@ Remark: Beneficiary bank account is not seeded with NPCI / DBT mapper or account
       let maskedCount = 0;
       let cleaned = text;
 
-      cleaned = cleaned.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, () => {
+      cleaned = cleaned.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, () => {
         maskedCount++;
         return "[EMAIL MASKED]";
       });
 
-      cleaned = cleaned.replace(/\d{4}[\s-]?\d{4}[\s-]?\d{4}/g, () => {
+      cleaned = cleaned.replace(/\b\d{4}[\s-]?\d{4}[\s-]?\d{4}\b/g, () => {
         maskedCount++;
-        return "[ID/AADHAAR MASKED]";
+        return "[ID MASKED]";
       });
 
-      cleaned = cleaned.replace(/(?:\+91[\s-]?)?[6-9]\d{9}/g, () => {
+      cleaned = cleaned.replace(/(?:\+91[\s-]?)?\b[6-9]\d{9}\b/g, () => {
         maskedCount++;
         return "[PHONE MASKED]";
       });
 
-      cleaned = cleaned.replace(/\d{9,18}/g, () => {
+      cleaned = cleaned.replace(/\b\d{9,18}\b/g, () => {
         maskedCount++;
         return "[NUMBER MASKED]";
       });
@@ -898,7 +885,10 @@ Remark: Beneficiary bank account is not seeded with NPCI / DBT mapper or account
         </div>
       `;
 
-      tipBox.innerHTML = `<strong>Selected language:</strong> ${langLabel}. Always double-check scheme deadlines and official portal rules before submitting changes.`;
+      const note = langSelect.value !== "en"
+        ? ` Selected language: ${langLabel} (full template text is currently provided in English).`
+        : ` Selected language: ${langLabel}.`;
+      tipBox.innerHTML = `<strong>Guidance note:</strong>${note} Always double-check scheme deadlines and official portal rules before submitting changes.`;
     }
 
     explainBtn.addEventListener("click", () => renderExplanation());
