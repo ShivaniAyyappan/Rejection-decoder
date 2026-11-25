@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rejection Decoder — Scholarship Notice & Remark Translator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy-950: #061024;
+      --navy-900: #0A1931;
+      --navy-800: #11264A;
+      --navy-700: #1B386B;
+      --navy-100: #E6ECF5;
+      --navy-50:  #F2F6FC;
+
+      --white:    #FFFFFF;
+      --bg-page:  #F5F7FB;
+      --border:   #D8E1EE;
+
+      --pink-500: #FF1E8A;
+      --pink-600: #DB0E72;
+      --pink-100: #FFE8F3;
+      --pink-200: #FFC2DF;
+
+      --text-main:  #0A1931;
+      --text-muted: #4A5A75;
+      --text-light: #CBD5E1;
+
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+      --shadow-card: 0 10px 30px -5px rgba(10, 25, 49, 0.08), 0 4px 10px -2px rgba(10, 25, 49, 0.04);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-main);
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Navy Header & Hero Band */
+    .top-band {
+      background: linear-gradient(135deg, var(--navy-950) 0%, var(--navy-900) 60%, var(--navy-800) 100%);
+      color: var(--white);
+      padding-bottom: 5.5rem;
+      border-bottom: 4px solid var(--pink-500);
+    }
+
+    .navbar {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1.1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 800;
+      font-size: 1.25rem;
+      letter-spacing: -0.02em;
+      color: var(--white);
+      text-decoration: none;
+    }
+
+    .brand-icon {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      background-color: var(--pink-500);
+      color: var(--white);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      box-shadow: 0 4px 14px rgba(255, 30, 138, 0.45);
+    }
+
+    .nav-badges {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+
+    .portal-tag {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.3rem 0.65rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text-light);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .privacy-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.35rem 0.8rem;
+      border-radius: 999px;
+      background: rgba(255, 30, 138, 0.16);
+      color: #FF9ECE;
+      border: 1px solid rgba(255, 30, 138, 0.45);
+    }
+
+    .hero {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2.25rem 1.5rem 0.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 1.25rem;
+    }
+
+    .hero-copy {
+      max-width: 740px;
+    }
+
+    .hero-eyebrow {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #FF66B2;
+      margin-bottom: 0.5rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.65rem, 3vw, 2.25rem);
+      font-weight: 800;
+      line-height: 1.2;
+      letter-spacing: -0.025em;
+      margin-bottom: 0.65rem;
+    }
+
+    .hero p {
+      font-size: 0.98rem;
+      color: var(--text-light);
+      max-width: 660px;
+    }
+
+    /* Main Workspace Grid */
+    .workspace {
+      max-width: 1200px;
+      width: 100%;
+      margin: -3.75rem auto 1.5rem;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      align-items: stretch;
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .card-header {
+      background: var(--navy-50);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.35rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .step-title {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--navy-900);
+    }
+
+    .step-badge {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: var(--navy-900);
+      color: var(--white);
+      font-size: 0.78rem;
+      font-weight: 700;
+      display: grid;
+      place-items: center;
+    }
+
+    .step-badge.pink {
+      background: var(--pink-500);
+    }
+
+    .ghost-btn {
+      background: var(--white);
+      border: 1px solid var(--border);
+      color: var(--navy-900);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 0.35rem 0.75rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .ghost-btn:hover {
+      border-color: var(--pink-500);
+      color: var(--pink-600);
+      background: var(--pink-100);
+    }
+
+    .card-body {
+      padding: 1.35rem;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      gap: 1rem;
+    }
+
+    .field-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--navy-900);
+      margin-bottom: 0.4rem;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 165px;
+      padding: 0.9rem 1rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: 0.92rem;
+      color: var(--navy-900);
+      background: var(--white);
+      resize: vertical;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    textarea::placeholder {
+      color: #8A99B2;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--pink-500);
+      box-shadow: 0 0 0 3px rgba(255, 30, 138, 0.12);
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+
+    /* Example Chips */
+    .examples-box {
+      background: var(--navy-50);
+      border: 1px solid var(--navy-100);
+      border-radius: var(--radius-md);
+      padding: 0.85rem 1rem;
+    }
+
+    .examples-title {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--navy-800);
+      margin-bottom: 0.55rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .examples-title span {
+      font-weight: 500;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+    }
+
+    .chip-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .chip {
+      background: var(--white);
+      border: 1px solid var(--border);
+      color: var(--navy-900);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.4rem 0.75rem;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .chip:hover {
+      border-color: var(--pink-500);
+      background: var(--pink-100);
+      color: var(--pink-600);
+    }
+
+    .chip.active {
+      background: var(--pink-500);
+      color: var(--white);
+      border-color: var(--pink-500);
+    }
+
+    /* Inline Controls Row */
+    .action-row {
+      display: grid;
+      grid-template-columns: 165px 1fr;
+      gap: 0.75rem;
+      margin-top: auto;
+    }
+
+    .select-wrap {
+      display: flex;
+      flex-direction: column;
+    }
+
+    select {
+      height: 48px;
+      padding: 0 0.85rem;
+      border: 2px solid var(--border);
+      border-radius: var(--radius-md);
+      background-color: var(--white);
+      color: var(--navy-900);
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: var(--navy-800);
+    }
+
+    .primary-btn {
+      height: 48px;
+      background-color: var(--pink-500);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: 0.98rem;
+      font-weight: 700;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(255, 30, 138, 0.32);
+      transition: background-color 0.15s ease, transform 0.1s ease;
+    }
+
+    .primary-btn:hover {
+      background-color: var(--pink-600);
+    }
+
+    .primary-btn:active {
+      transform: translateY(1px);
+    }
+
+    .privacy-note {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: var(--navy-50);
+      padding: 0.65rem 0.85rem;
+      border-radius: var(--radius-sm);
+      border-left: 3px solid var(--pink-500);
+    }
+
+    /* Output Card */
+    .preview-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      flex: 1;
+    }
+
+    .preview-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 0.9rem 1rem;
+      background: var(--white);
+      border-left: 4px solid var(--navy-800);
+    }
+
+    .preview-item.accent-pink {
+      border-left-color: var(--pink-500);
+      background: #FFFBFD;
+    }
+
+    .preview-item h3 {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--navy-900);
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+    }
+
+    .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--navy-800);
+      display: inline-block;
+    }
+
+    .dot.pink {
+      background: var(--pink-500);
+    }
+
+    .preview-item p,
+    .preview-item li {
+      font-size: 0.86rem;
+      color: var(--text-muted);
+    }
+
+    .preview-item ul {
+      padding-left: 1.15rem;
+      margin-top: 0.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .masked-banner {
+      background: var(--pink-100);
+      border: 1px solid var(--pink-200);
+      color: var(--navy-900);
+      font-size: 0.78rem;
+      padding: 0.6rem 0.85rem;
+      border-radius: var(--radius-sm);
+      display: none;
+    }
+
+    .masked-banner.visible {
+      display: block;
+    }
+
+    .tip-box {
+      margin-top: auto;
+      background: var(--navy-50);
+      border: 1px solid var(--navy-100);
+      border-radius: var(--radius-md);
+      padding: 0.8rem 1rem;
+      font-size: 0.8rem;
+      color: var(--navy-800);
+    }
+
+    /* Quick Reference Strip */
+    .quick-strip {
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto 2.5rem;
+      padding: 0 1.5rem;
+    }
+
+    .quick-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1rem 1.35rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.85rem;
+      box-shadow: var(--shadow-card);
+    }
+
+    .quick-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--navy-900);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .quick-tag {
+      background: var(--pink-500);
+      color: var(--white);
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+    }
+
+    .quick-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    /* Footer */
+    footer {
+      margin-top: auto;
+      background: var(--navy-950);
+      color: var(--text-light);
+      padding: 1.15rem 1.5rem;
+      font-size: 0.78rem;
+      border-top: 3px solid var(--pink-500);
+    }
+
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    @media (max-width: 900px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+      .action-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="top-band">
+    <nav class="navbar">
+      <a href="#" class="brand">
+        <span class="brand-icon">✓</span>
+        <span>Rejection Decoder</span>
+      </a>
+      <div class="nav-badges">
+        <span class="portal-tag">NSP &amp; State Portals</span>
+        <span class="portal-tag">Remark Translator</span>
+        <span class="privacy-pill">● Auto-Masks IDs Locally</span>
+      </div>
+    </nav>
+
+    <header class="hero">
+      <div class="hero-copy">
+        <div class="hero-eyebrow">Scholarship Status &amp; Remark Guide</div>
+        <h1>Decode "Defective" or "Rejected" Notices Without Guesswork</h1>
+        <p>Paste your scholarship portal status and officer remark to see what the message means in plain language, what steps to take next, and who to contact.</p>
+      </div>
+    </header>
+  </div>
+
+  <main class="workspace">
+    <!-- Left Column: Input -->
+    <section class="card" aria-label="Notice Input">
+      <div class="card-header">
+        <div class="step-title">
+          <span class="step-badge">1</span>
+          <span>Your Portal Notice</span>
+        </div>
+        <button type="button" class="ghost-btn" id="clearBtn">Clear</button>
+      </div>
+
+      <div class="card-body">
+        <div>
+          <label for="noticeInput" class="field-label">
+            <span>Status and officer remark</span>
+          </label>
+          <textarea
+            id="noticeInput"
+            maxlength="2000"
+            placeholder="Paste the status and officer remark here...&#10;Example: Status: Defective | Remark: Income certificate expired or missing digital signature."
+          ></textarea>
+          <div class="meta-row">
+            <span>Status and remark text only</span>
+            <span id="charCount">0 / 2000</span>
+          </div>
+        </div>
+
+        <div class="examples-box">
+          <div class="examples-title">
+            <span>No notice handy? Try a sample</span>
+            <span>Sample remarks are illustrative</span>
+          </div>
+          <div class="chip-group" id="sampleChips">
+            <button type="button" class="chip" data-sample="income">Income certificate</button>
+            <button type="button" class="chip" data-sample="name">Name mismatch</button>
+            <button type="button" class="chip" data-sample="unclear">Unclear notice</button>
+            <button type="button" class="chip" data-sample="bank">Bank / NPCI seeding</button>
+          </div>
+        </div>
+
+        <div class="action-row">
+          <div class="select-wrap">
+            <select id="langSelect" aria-label="Explanation language">
+              <option value="en" selected>English</option>
+              <option value="hi">Hindi (हिन्दी)</option>
+              <option value="ta">Tamil (தமிழ்)</option>
+            </select>
+          </div>
+          <button type="button" class="primary-btn" id="explainBtn">Explain my notice →</button>
+        </div>
+
+        <div class="privacy-note">
+          <span>🛡️</span>
+          <span>Aadhaar, phone numbers, emails, and long account numbers are masked on your device before processing.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Column: Explanation & Action Plan -->
+    <section class="card" aria-label="Decoded Explanation">
+      <div class="card-header">
+        <div class="step-title">
+          <span class="step-badge pink">2</span>
+          <span id="outputHeading">What You Will Get</span>
+        </div>
+        <button type="button" class="ghost-btn" id="copyBtn">Copy summary</button>
+      </div>
+
+      <div class="card-body">
+        <div class="masked-banner" id="maskedBanner"></div>
+
+        <div class="preview-stack" id="outputContainer">
+          <div class="preview-item accent-pink">
+            <h3><span class="dot pink"></span> Plain-Language Meaning</h3>
+            <p>Translates portal status labels and verification remarks into clear, everyday terms.</p>
+          </div>
+
+          <div class="preview-item">
+            <h3><span class="dot"></span> Practical Fix Checklist</h3>
+            <ul>
+              <li>Check which document, field, or bank detail was flagged.</li>
+              <li>Prepare a clear, valid replacement or correction before the portal window closes.</li>
+            </ul>
+          </div>
+
+          <div class="preview-item accent-pink">
+            <h3><span class="dot pink"></span> Who to Contact</h3>
+            <p>Shows whether to start with your institute nodal officer, verifier, or portal helpdesk.</p>
+          </div>
+        </div>
+
+        <div class="tip-box" id="tipBox">
+          <strong>Tip:</strong> Paste both the status line (such as <em>Defective</em> or <em>Pending at Institute</em>) and the exact officer remark for the clearest breakdown.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <section class="quick-strip" aria-label="Common triggers">
+    <div class="quick-card">
+      <div class="quick-label">
+        <span class="quick-tag">Quick Fill</span>
+        <span>Common verification remarks:</span>
+      </div>
+      <div class="quick-pills">
+        <button type="button" class="chip" data-sample="income">Expired income certificate</button>
+        <button type="button" class="chip" data-sample="name">Applicant name mismatch</button>
+        <button type="button" class="chip" data-sample="bank">Aadhaar seeding pending</button>
+        <button type="button" class="chip" data-sample="unclear">Generic / incomplete remark</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="footer-inner">
+      <span>This tool provides general guidance from curated templates—not legal or official advice. Always confirm instructions on your official scholarship portal.</span>
+      <span>Rejection Decoder • Navy, White &amp; Bright Pink UI</span>
+    </div>
+  </footer>
+
+  <script>
+    const SAMPLES = {
+      income: "Status: Marked Defective by Verifier
+Remark: Income certificate validity expired or issued by unauthorized authority. Upload valid certificate.",
+      name: "Status: Defective / Re-submit Required
+Remark: Applicant name on application does not match Aadhaar / mark sheet records.",
+      unclear: "Status: Rejected / Defective
+Remark: Verification failed due to discrepancy in submitted details. Contact concerned authority.",
+      bank: "Status: Payment / Verification Hold
+Remark: Beneficiary bank account is not seeded with NPCI / DBT mapper or account details mismatch."
+    };
+
+    const GUIDES = {
+      income: {
+        title: "Income Certificate Issue",
+        meaning: "The reviewer flagged your income certificate as expired, incomplete, or not issued by an accepted issuing authority for the current cycle.",
+        steps: [
+          "Check the issue date, validity period, and issuing designation required by your scholarship scheme.",
+          "Obtain an updated certificate from the designated issuing authority if yours is expired or missing required details.",
+          "Re-upload a clear, legible scan/PDF during the active correction window and re-submit for verification."
+        ],
+        contact: "Start with your institute scholarship nodal/verification officer to confirm exact scheme rules, then check the official portal helpdesk if re-upload is locked."
+      },
+      name: {
+        title: "Name Mismatch Across Records",
+        meaning: "Your name spelling, initials, or name order differs between your scholarship form, ID/Aadhaar, or academic certificates.",
+        steps: [
+          "Compare every character and initial of your name across your application form, ID proof, and mark sheets.",
+          "Follow the portal's specific rule for minor spelling differences vs. major name changes or supporting documents.",
+          "Update allowed profile fields or attach required supporting proof if permitted by the portal workflow."
+        ],
+        contact: "Check with your institute verification officer first—many portals require institute-level correction or re-opening before final approval."
+      },
+      bank: {
+        title: "Bank Account / DBT Seeding Hold",
+        meaning: "Your bank account may not be active for Direct Benefit Transfer (DBT) / NPCI mapping, or the account details entered do not match bank records.",
+        steps: [
+          "Verify that your bank account is active, KYC-compliant, and linked/seeded for DBT/NPCI on the bank side.",
+          "Confirm account number, IFSC, and holder name match your official passbook or bank statement.",
+          "Recheck portal payment status after bank seeding updates reflect."
+        ],
+        contact: "Contact your bank branch for NPCI/DBT seeding status and check the portal's payment/PFMS/DBT status section."
+      },
+      unclear: {
+        title: "Vague or Incomplete Portal Remark",
+        meaning: "The portal shows a short or generic reason without naming the exact document or field that needs attention.",
+        steps: [
+          "Review every uploaded document and entered field in your submitted application for typos, blurry scans, or missing pages.",
+          "Note your application ID, current status timestamp, and exact remark wording before reaching out.",
+          "Ask specifically which field or document caused the 'Defective' or 'Rejected' status."
+        ],
+        contact: "Reach out to your institute nodal officer or verifier first, as they often see internal verification notes not shown to applicants."
+      }
+    };
+
+    const noticeInput = document.getElementById("noticeInput");
+    const charCount = document.getElementById("charCount");
+    const clearBtn = document.getElementById("clearBtn");
+    const explainBtn = document.getElementById("explainBtn");
+    const copyBtn = document.getElementById("copyBtn");
+    const outputContainer = document.getElementById("outputContainer");
+    const outputHeading = document.getElementById("outputHeading");
+    const maskedBanner = document.getElementById("maskedBanner");
+    const tipBox = document.getElementById("tipBox");
+    const langSelect = document.getElementById("langSelect");
+
+    function maskSensitiveText(text) {
+      let maskedCount = 0;
+      let cleaned = text;
+
+      cleaned = cleaned.replace(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi, () => {
+        maskedCount++;
+        return "[EMAIL MASKED]";
+      });
+
+      cleaned = cleaned.replace(/\d{4}[\s-]?\d{4}[\s-]?\d{4}/g, () => {
+        maskedCount++;
+        return "[ID/AADHAAR MASKED]";
+      });
+
+      cleaned = cleaned.replace(/(?:\+91[\s-]?)?[6-9]\d{9}/g, () => {
+        maskedCount++;
+        return "[PHONE MASKED]";
+      });
+
+      cleaned = cleaned.replace(/\d{9,18}/g, () => {
+        maskedCount++;
+        return "[NUMBER MASKED]";
+      });
+
+      return { cleaned, maskedCount };
+    }
+
+    function detectCategory(text) {
+      const lower = text.toLowerCase();
+      if (lower.includes("income") || lower.includes("certificate")) return "income";
+      if (lower.includes("name") || lower.includes("mismatch") || lower.includes("spelling")) return "name";
+      if (lower.includes("bank") || lower.includes("npci") || lower.includes("account") || lower.includes("dbt")) return "bank";
+      return "unclear";
+    }
+
+    function updateCounter() {
+      charCount.textContent = `${noticeInput.value.length} / 2000`;
+    }
+
+    noticeInput.addEventListener("input", updateCounter);
+
+    clearBtn.addEventListener("click", () => {
+      noticeInput.value = "";
+      updateCounter();
+      maskedBanner.classList.remove("visible");
+      maskedBanner.textContent = "";
+      document.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
+      outputHeading.textContent = "What You Will Get";
+      outputContainer.innerHTML = `
+        <div class="preview-item accent-pink">
+          <h3><span class="dot pink"></span> Plain-Language Meaning</h3>
+          <p>Translates portal status labels and verification remarks into clear, everyday terms.</p>
+        </div>
+        <div class="preview-item">
+          <h3><span class="dot"></span> Practical Fix Checklist</h3>
+          <ul>
+            <li>Check which document, field, or bank detail was flagged.</li>
+            <li>Prepare a clear, valid replacement or correction before the portal window closes.</li>
+          </ul>
+        </div>
+        <div class="preview-item accent-pink">
+          <h3><span class="dot pink"></span> Who to Contact</h3>
+          <p>Shows whether to start with your institute nodal officer, verifier, or portal helpdesk.</p>
+        </div>
+      `;
+    });
+
+    document.querySelectorAll(".chip[data-sample]").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const key = chip.getAttribute("data-sample");
+        document.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
+        document.querySelectorAll(`.chip[data-sample="${key}"]`).forEach((c) => c.classList.add("active"));
+        noticeInput.value = SAMPLES[key] || "";
+        updateCounter();
+        renderExplanation(key);
+      });
+    });
+
+    function renderExplanation(forcedKey = null) {
+      const raw = noticeInput.value.trim();
+      if (!raw) {
+        outputHeading.textContent = "Add a Notice First";
+        outputContainer.innerHTML = `
+          <div class="preview-item accent-pink">
+            <h3><span class="dot pink"></span> No Notice Text Entered</h3>
+            <p>Paste your scholarship status and remark on the left, or click one of the sample chips to see a breakdown.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const { cleaned, maskedCount } = maskSensitiveText(raw);
+      if (maskedCount > 0) {
+        maskedBanner.textContent = `Local privacy filter masked ${maskedCount} sensitive pattern(s) before generating guidance.`;
+        maskedBanner.classList.add("visible");
+      } else {
+        maskedBanner.classList.remove("visible");
+      }
+
+      const category = forcedKey || detectCategory(cleaned);
+      const guide = GUIDES[category];
+      const langLabel = langSelect.options[langSelect.selectedIndex].text;
+
+      outputHeading.textContent = `${guide.title} (${langLabel})`;
+      const stepsHtml = guide.steps.map((s) => `<li>${s}</li>`).join("");
+
+      outputContainer.innerHTML = `
+        <div class="preview-item accent-pink">
+          <h3><span class="dot pink"></span> Plain-Language Meaning</h3>
+          <p>${guide.meaning}</p>
+        </div>
+        <div class="preview-item">
+          <h3><span class="dot"></span> Practical Fix Checklist</h3>
+          <ul>${stepsHtml}</ul>
+        </div>
+        <div class="preview-item accent-pink">
+          <h3><span class="dot pink"></span> Who to Contact</h3>
+          <p>${guide.contact}</p>
+        </div>
+      `;
+
+      tipBox.innerHTML = `<strong>Selected language:</strong> ${langLabel}. Always double-check scheme deadlines and official portal rules before submitting changes.`;
+    }
+
+    explainBtn.addEventListener("click", () => renderExplanation());
+
+    copyBtn.addEventListener("click", async () => {
+      const textToCopy = outputContainer.innerText.trim();
+      if (!textToCopy) return;
+      try {
+        await navigator.clipboard.writeText(textToCopy);
+        const prev = copyBtn.textContent;
+        copyBtn.textContent = "Copied!";
+        setTimeout(() => {
+          copyBtn.textContent = prev;
+        }, 1500);
+      } catch (_) {
+        copyBtn.textContent = "Select text to copy";
+      }
+    });
+  </script>
+</body>
+</html>
