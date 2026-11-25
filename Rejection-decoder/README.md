@@ -35,6 +35,4 @@ Import this repo in Vercel and add the `GEMINI_API_KEY` environment variable. No
 - Not legal advice. Always confirm on the official portal.
 - Sample notices in the app are made up.
 
-## Roadmap
 
-Photo upload of notices, more schemes, more reasons, and RTI draft templates.
