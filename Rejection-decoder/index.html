@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Rejection Decoder: understand your scholarship notice</title>
+<meta name="description" content="Paste a scholarship rejection or defect notice and get a plain-language explanation, a fix list, and a draft letter.">
+<style>
+:root{
+  --page:#eef1f5; --panel:#fff; --ink:#13202e; --muted:#4b5b6a; --line:#d2dae3; --soft:#f4f7fa;
+  --band:#13202e; --band-ink:#f2f6f9; --accent:#0b6b78; --accent-ink:#fff;
+  --warn:#9a5b00; --bad:#a3342a; --ok:#2a6a38; --unknown:#4b5b6a;
+  --shadow:0 1px 2px rgba(19,32,46,.06),0 8px 24px -12px rgba(19,32,46,.18);
+  --serif:Charter,"Bitstream Charter","Sitka Text",Cambria,Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans","Noto Sans Tamil","Noto Sans Devanagari","Noto Sans Telugu","Noto Sans Bengali",sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{--page:#0c151c; --panel:#142129; --ink:#e7eef2; --muted:#9fb1bc; --line:#2a3d48; --soft:#0f1b22;
+  --band:#08111a; --accent:#52c7d3; --accent-ink:#06161a; --warn:#e5a84a; --bad:#ef8576; --ok:#82cb90; --unknown:#9fb1bc;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -12px rgba(0,0,0,.6)}
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--page);color:var(--ink);font:16px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+.skip{position:absolute;left:12px;top:-60px;background:var(--accent);color:var(--accent-ink);padding:8px 14px;border-radius:8px;z-index:9;text-decoration:none;font-weight:600}
+.skip:focus{top:12px}
+.wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+
+.hero{background:var(--band);color:var(--band-ink);padding:34px 0 64px}
+.brand{display:flex;gap:16px;align-items:center}
+.seal{flex:none;width:54px;height:54px}
+h1{font:700 clamp(28px,4.4vw,42px)/1.1 var(--serif);margin:0;letter-spacing:-.015em}
+.lede{margin:14px 0 0;max-width:62ch;color:#c3d0d9;font-size:17px}
+@media (prefers-color-scheme:dark){.lede{color:#9fb1bc}}
+
+.grid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:24px;align-items:start;margin-top:-36px;padding-bottom:12px}
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:24px;box-shadow:var(--shadow)}
+.panel h2.ph{font:600 19px/1.3 var(--serif);margin:0 0 16px}
+
+label{display:block;font-weight:600;margin:0 0 6px}
+textarea,select{width:100%;font:inherit;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:12px 14px;transition:border-color .15s,box-shadow .15s}
+textarea{min-height:176px;resize:vertical}
+textarea:hover,select:hover{border-color:var(--muted)}
+textarea:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 30%,transparent)}
+button:focus-visible,a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.meta{display:flex;justify-content:space-between;gap:12px;font-size:13px;color:var(--muted);margin-top:6px}
+.meta .over{color:var(--bad);font-weight:600}
+.samples{margin-top:18px}
+.samples p{margin:0 0 8px;font-size:14px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:inherit;font-size:14px;color:var(--ink);background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:6px 14px;cursor:pointer;transition:border-color .15s,background .15s}
+.chip:hover{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--soft))}
+.row{margin-top:18px}
+.go{margin-top:22px;width:100%;font:inherit;font-weight:600;font-size:17px;color:var(--accent-ink);background:var(--accent);border:0;border-radius:10px;padding:14px 16px;cursor:pointer;transition:filter .15s,transform .05s}
+.go:hover{filter:brightness(1.08)}
+.go:active{transform:translateY(1px)}
+.go[disabled]{opacity:.65;cursor:wait}
+.hint{font-size:14px;color:var(--muted);margin:10px 0 0}
+.privacy{display:flex;gap:8px;align-items:flex-start}
+.privacy svg{flex:none;margin-top:3px}
+
+/* result */
+#result:focus{outline:none}
+.empty{color:var(--muted)}
+.empty h3{font:600 19px/1.3 var(--serif);color:var(--ink);margin:0 0 8px}
+.empty ol{padding-left:20px;margin:10px 0 0}
+.stampbar{display:flex;align-items:center;gap:18px;flex-wrap:wrap;margin-bottom:6px}
+.stamp{display:inline-block;font:700 20px/1 var(--serif);letter-spacing:.04em;text-transform:uppercase;color:var(--tone);border:3px solid var(--tone);border-radius:8px;padding:10px 16px;transform:rotate(-3deg);outline:2px solid var(--tone);outline-offset:-8px;animation:press .35s cubic-bezier(.2,.9,.3,1.3)}
+@keyframes press{from{transform:rotate(-3deg) scale(1.5);opacity:0}to{transform:rotate(-3deg) scale(1);opacity:1}}
+.tone-warn{--tone:var(--warn)} .tone-bad{--tone:var(--bad)} .tone-ok{--tone:var(--ok)} .tone-unknown{--tone:var(--unknown)}
+.conf{font-size:14px;color:var(--muted)}
+.title{font:600 24px/1.25 var(--serif);margin:10px 0 0}
+.sec{margin-top:24px}
+.sec h3{font:600 17px/1.3 var(--sans);margin:0 0 8px}
+.sec p{margin:0;max-width:68ch}
+.steps{list-style:none;counter-reset:s;margin:0;padding:0}
+.steps li{counter-increment:s;position:relative;padding:0 0 12px 40px;margin:0}
+.steps li::before{content:counter(s);position:absolute;left:0;top:0;width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:14px;display:grid;place-items:center}
+.steps li:not(:last-child)::after{content:"";position:absolute;left:13px;top:30px;bottom:2px;width:2px;background:var(--line)}
+.letter{white-space:pre-wrap;background:var(--soft);border:1px dashed var(--muted);border-radius:10px;padding:16px;font:15px/1.6 var(--serif)}
+.copy{margin-top:10px;font:inherit;font-size:14px;font-weight:600;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:8px;padding:7px 14px;cursor:pointer}
+.copy:hover{border-color:var(--accent)}
+.notice{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);font-size:14px;color:var(--muted)}
+.notice a{color:var(--accent);font-weight:600}
+.flag{background:color-mix(in srgb,var(--accent) 12%,var(--panel));border:1px solid color-mix(in srgb,var(--accent) 40%,var(--line));border-radius:10px;padding:10px 14px;font-size:14px;margin-bottom:16px}
+.err{color:var(--bad);font-weight:600;margin:0}
+.skeleton{display:grid;gap:12px}
+.skeleton span{display:block;height:16px;border-radius:6px;background:linear-gradient(90deg,var(--soft),var(--line),var(--soft));background-size:200% 100%;animation:sh 1.2s linear infinite}
+.skeleton span:first-child{height:42px;width:40%}
+.skeleton span:nth-child(3){width:75%}
+@keyframes sh{to{background-position:-200% 0}}
+footer{margin:20px auto 0;padding:0 20px 44px;max-width:1100px;font-size:13px;color:var(--muted)}
+footer p{max-width:75ch;margin:0}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#notice">Skip to notice input</a>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="brand">
+      <svg class="seal" viewBox="0 0 64 64" role="img" aria-label="Rejection Decoder logo">
+        <circle cx="32" cy="32" r="29" fill="none" stroke="currentColor" stroke-width="3"/>
+        <circle cx="32" cy="32" r="22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <path d="M21 33l8 8 15-17" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <h1>Rejection Decoder</h1>
+    </div>
+    <p class="lede">Got a scholarship notice that says "defective" or "rejected" and no clear reason? Paste it here to see what it means, what to fix, and who to contact.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="grid">
+    <section class="panel" aria-labelledby="in-h">
+      <h2 class="ph" id="in-h">Your notice</h2>
+      <label for="notice">Notice text from your portal</label>
+      <textarea id="notice" maxlength="2000" aria-describedby="count" placeholder="Paste the status and officer remark here"></textarea>
+      <div class="meta"><span>Status and remark only</span><span id="count" aria-live="off">0 / 2000</span></div>
+
+      <div class="samples">
+        <p id="samples-l">No notice handy? Try an example.</p>
+        <div class="chips" role="group" aria-labelledby="samples-l">
+          <button type="button" class="chip" data-s="0">Income certificate</button>
+          <button type="button" class="chip" data-s="1">Name mismatch</button>
+          <button type="button" class="chip" data-s="2">Unclear notice</button>
+        </div>
+        <p class="hint">Examples are made up, not real applications.</p>
+      </div>
+
+      <div class="row">
+        <label for="lang">Explain in</label>
+        <select id="lang">
+          <option>English</option><option>Hindi</option><option>Tamil</option><option>Telugu</option>
+          <option>Kannada</option><option>Malayalam</option><option>Bengali</option><option>Marathi</option>
+        </select>
+      </div>
+      <button class="go" id="go" type="button">Explain my notice</button>
+      <p class="hint privacy">
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5l8-3z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+        <span>Aadhaar, phone, email and long account numbers are hidden on your device before anything is sent.</span>
+      </p>
+    </section>
+
+    <section class="panel" aria-label="Explanation" aria-live="polite" aria-busy="false">
+      <div id="result" tabindex="-1">
+        <div class="empty">
+          <h3>Your explanation will appear here</h3>
+          <ol>
+            <li>Copy the status and remark from your scholarship portal.</li>
+            <li>Paste them on the left, or pick an example.</li>
+            <li>Choose Explain my notice.</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <p>This tool explains notices using a small library of reasons that was checked by hand. It is not legal advice and it can be wrong or out of date. Always confirm on the official portal before you act.</p>
+</footer>
+
+<script src="js/logic.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

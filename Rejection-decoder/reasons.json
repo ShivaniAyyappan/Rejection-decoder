@@ -8,8 +8,20 @@
     {
       "id": "institute_verification_pending",
       "title": "Your institute has not verified the application",
-      "applies_to_status": ["Defective", "Pending"],
-      "clues": ["institute verification", "IV pending", "not verified by institute", "institute level", "college verification"],
+      "applies_to_status": [
+        "Defective",
+        "Pending"
+      ],
+      "clues": [
+        "institute verification",
+        "IV pending",
+        "not verified by institute",
+        "institute level",
+        "college verification",
+        "pending at institute",
+        "institute approval",
+        "nodal officer verification"
+      ],
       "explanation": "Your application must be checked by your college or school nodal officer before it moves ahead. It is stuck at that step.",
       "fix_steps": [
         "Log in to the portal and note the exact status and remark.",
@@ -26,8 +38,20 @@
     {
       "id": "income_certificate_issue",
       "title": "Income certificate problem",
-      "applies_to_status": ["Defective", "Rejected"],
-      "clues": ["income certificate", "income proof", "income invalid", "income not matching", "certificate expired", "issuing authority"],
+      "applies_to_status": [
+        "Defective",
+        "Rejected"
+      ],
+      "clues": [
+        "income certificate",
+        "income proof",
+        "income invalid",
+        "income not matching",
+        "certificate expired",
+        "issuing authority",
+        "income certificate expired",
+        "income certificate invalid"
+      ],
       "explanation": "The income certificate you uploaded was not accepted. Common causes are an expired certificate, one from the wrong issuing authority, an unreadable scan, or an income value that does not match what you entered.",
       "fix_steps": [
         "Read the officer remark to see which of these applies.",
@@ -45,8 +69,23 @@
     {
       "id": "name_dob_mismatch",
       "title": "Name or date of birth does not match across documents",
-      "applies_to_status": ["Defective", "Rejected"],
-      "clues": ["name mismatch", "name not matching", "date of birth", "dob mismatch", "details mismatch", "aadhaar mismatch", "spelling"],
+      "applies_to_status": [
+        "Defective",
+        "Rejected"
+      ],
+      "clues": [
+        "name mismatch",
+        "name not matching",
+        "date of birth",
+        "dob mismatch",
+        "details mismatch",
+        "aadhaar mismatch",
+        "spelling",
+        "does not match",
+        "not match",
+        "name different",
+        "initial mismatch"
+      ],
       "explanation": "Your name, date of birth, or category is written differently in two documents (for example Aadhaar, marksheet, bank passbook). The verifier cannot confirm they belong to the same person.",
       "fix_steps": [
         "Put your Aadhaar, marksheet, bank passbook and certificates side by side.",
@@ -63,8 +102,30 @@
     {
       "id": "bank_aadhaar_pfms",
       "title": "Bank account or Aadhaar seeding problem",
-      "applies_to_status": ["Defective", "Rejected", "Payment failed"],
-      "clues": ["bank", "account", "ifsc", "pfms", "aadhaar seeding", "npci", "payment failed", "dbt"],
+      "applies_to_status": [
+        "Defective",
+        "Rejected",
+        "Payment failed"
+      ],
+      "clues": [
+        "bank",
+        "account",
+        "ifsc",
+        "pfms",
+        "aadhaar seeding",
+        "npci",
+        "payment failed",
+        "dbt",
+        "bank account",
+        "account number",
+        "ifsc code",
+        "invalid ifsc",
+        "wrong ifsc",
+        "account closed",
+        "account inactive",
+        "not seeded",
+        "beneficiary"
+      ],
       "explanation": "The scholarship money cannot be sent to your bank account. Usually the account is not linked to Aadhaar for payments, the name differs, or the account details are wrong.",
       "fix_steps": [
         "Check that the account number and IFSC code in your form are correct.",
@@ -81,8 +142,24 @@
     {
       "id": "wrong_or_unclear_document",
       "title": "Wrong, unclear or incomplete document uploaded",
-      "applies_to_status": ["Defective", "Rejected"],
-      "clues": ["document not clear", "illegible", "wrong document", "incomplete document", "not readable", "document missing", "upload"],
+      "applies_to_status": [
+        "Defective",
+        "Rejected"
+      ],
+      "clues": [
+        "document not clear",
+        "illegible",
+        "wrong document",
+        "incomplete document",
+        "not readable",
+        "document missing",
+        "upload",
+        "document blurry",
+        "blurry",
+        "wrong file",
+        "file format",
+        "document not uploaded"
+      ],
       "explanation": "A document you uploaded is not the one required, is cut off or blurry, or is not in the required format. A common example is uploading a computation sheet where an acceptance or acknowledgement is required.",
       "fix_steps": [
         "Open the officer remark to see which document is meant.",
@@ -99,8 +176,22 @@
     {
       "id": "eligibility_not_met",
       "title": "Eligibility condition not met",
-      "applies_to_status": ["Rejected"],
-      "clues": ["not eligible", "eligibility", "criteria not met", "marks", "percentage", "course not covered", "income limit"],
+      "applies_to_status": [
+        "Rejected"
+      ],
+      "clues": [
+        "not eligible",
+        "eligibility",
+        "criteria not met",
+        "marks",
+        "percentage",
+        "course not covered",
+        "income limit",
+        "income limit exceeded",
+        "not meeting",
+        "does not qualify",
+        "not qualified"
+      ],
       "explanation": "The reviewer found that you do not meet one of the scheme conditions, such as the income limit, minimum marks, course, or category. A Rejected application usually cannot be edited.",
       "fix_steps": [
         "Read the remark and the scheme guidelines side by side to find the exact condition.",
@@ -117,8 +208,22 @@
     {
       "id": "state_nodal_incorrect_details",
       "title": "State level officer found incorrect details",
-      "applies_to_status": ["Defective", "Rejected"],
-      "clues": ["state nodal", "snO", "state level", "incorrect details", "state verification", "domicile", "residence"],
+      "applies_to_status": [
+        "Defective",
+        "Rejected"
+      ],
+      "clues": [
+        "state nodal",
+        "sno",
+        "state level",
+        "incorrect details",
+        "state verification",
+        "domicile",
+        "residence",
+        "incorrect details found",
+        "state officer",
+        "state nodal officer"
+      ],
       "explanation": "After your institute approved it, the state level officer found a detail that did not check out, such as domicile, category or course information.",
       "fix_steps": [
         "Read which detail the state officer named.",
@@ -135,8 +240,18 @@
     {
       "id": "marked_fake",
       "title": "Application marked as fake",
-      "applies_to_status": ["Fake"],
-      "clues": ["fake", "fraud", "false information", "forged", "fake application"],
+      "applies_to_status": [
+        "Fake"
+      ],
+      "clues": [
+        "fake",
+        "fraud",
+        "false information",
+        "forged",
+        "fake application",
+        "duplicate application",
+        "marked as fake"
+      ],
       "explanation": "The reviewer believes the application contains false or duplicate information. This is serious and is usually not editable.",
       "fix_steps": [
         "Read the officer remark carefully to see what was flagged.",
