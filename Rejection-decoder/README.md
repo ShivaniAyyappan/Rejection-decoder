@@ -1,76 +1,157 @@
 # Rejection Decoder
 
-Paste a scholarship rejection or "defective" notice and get a plain-language explanation, a fix checklist, who to contact, and a draft letter, in your language.
+**Turn a vague scholarship rejection notice into a clear explanation, a fix checklist, and a ready-to-send letter, using only a hand-written library of reasons and admitting when it isn't sure.**
+
+🔗 **Live demo:** https://rejectiondecoder.vercel.app
+
+Built for the Promptwars x AI Vibeathon 2026 (Hack2Skill).
+
+---
 
 ## The problem
 
-Students often get notices like "documents mismatched" or "application not recommended" with no clear next step. Existing resources are generic guides, and general chatbots can guess wrong. A wrong fix can cost a student a deadline.
+Students in India apply for scholarships on portals like NSP, then get a status such as **"Defective"** or **"Rejected"** with a short remark like *"income certificate invalid"* or *"details mismatch."*
+
+They often don't know what it means, whether they can fix it, or who to go to. A missed deadline or a wrong fix can cost them the scholarship. The portal gives the decision, but not the "why" or the "what now?"
+
+## What it does
+
+Paste the status and officer remark from your notice, pick a language, and get:
+
+- **What it means**, in plain words
+- **What to do**, as a step-by-step fix checklist
+- **Who to contact:** the institute nodal/verification officer, the bank, or the portal helpdesk
+- **A draft letter** you can copy, edit, and send
+- **An official link** to check before acting
+
+Supported languages: English, Hindi, Tamil, Telugu, Kannada, Malayalam, Bengali, Marathi.
+
+## What makes it different
+
+Anyone can paste a notice into a general chatbot. Existing guides and chatbots are generic. This tool is built to be **grounded and careful**:
+
+1. **It answers from a fixed library.** The AI can only choose from the reasons in `reasons.json`. It is instructed not to invent reasons, rules, deadlines, links, or office names, and the code discards any answer that names a reason that isn't in the library.
+2. **It reads the status first.** A *Defective* application can usually be corrected and resubmitted. A *Rejected* or *Fake* one usually can't be corrected, so the route is different. If the status and the matched reason don't fit together, the tool falls back instead of guessing.
+3. **It says "I'm not sure" when it should.** An unknown reason, low confidence, or a status/reason mismatch triggers a safe fallback that tells the student to read the exact remark and ask the nodal officer or helpdesk.
+
+The contact, route, and official link in a result always come from the library entry, never from the AI.
+
+## Reasons covered (4)
+
+The library is intentionally small. Each entry lives in `reasons.json`.
+
+| # | Reason | Who to contact |
+|---|--------|----------------|
+| 1 | **Income Certificate Issue** | Institute scholarship nodal/verification officer, or the official portal helpdesk |
+| 2 | **Name Mismatch Across Records** | Institute verification officer |
+| 3 | **Bank Account / DBT Seeding Hold** | Bank branch, and the portal's payment/DBT status section |
+| 4 | **Vague or Incomplete Portal Remark** *(fallback)* | Institute nodal officer or verifier |
+
+Anything that doesn't clearly match one of these gets the safe fallback.
 
 ## How it works
 
-1. The page hides Aadhaar, phone, email and long account numbers on the student's device, then sends the notice to a small serverless function (`api/decode.js`).
-2. The AI may only choose from `reasons.json`, a library of rejection reasons with fixes and official links.
-3. Guardrails in code: unknown reason, low confidence, or a status that does not fit the reason gives an honest "we could not match this" answer.
-4. The official link, route and contact always come from the library, never from the AI.
-5. If the AI is slow, down or returns something odd, a keyword matcher (`lib/engine.js`) answers from the same library, in English, instead of failing.
-6. The status matters. A *Defective* application can be corrected and resubmitted. A *Rejected* or *Fake* one usually cannot, so it goes to grievance or the next cycle.
-
-## Project layout
-
 ```
-index.html        page (styles inline, no external fonts or scripts)
-js/logic.js       browser helpers with no DOM code: redaction, validation, response checks
-js/app.js         page behaviour: cache, timeout, accessibility
-api/decode.js     serverless endpoint
-lib/engine.js     decision logic: status detection, keyword scoring, guardrails on AI output
-reasons.json      hand-checked reason library
-tests/            automated tests
-```
-
-## Assumptions
-
-- Notices follow the NSP style: a status (Defective, Rejected, Fake, Pending, Payment failed) plus an officer remark.
-- The library is the only source of facts. The AI may only choose from it and rephrase it.
-- Students paste text. They do not upload files.
-- When two reasons score exactly equal, we say "could not match" instead of guessing.
-
-## Run locally
-
-```bash
-npm i -g vercel
-export GEMINI_API_KEY=your_key      # from aistudio.google.com
-vercel dev
+Student pastes status + remark and picks a language
+            │
+            ▼
+   Page (index.html + app.js) ── sensitive details masked on the device
+            │
+            ▼
+   Vercel serverless function (api/decode.js)
+            │
+            ▼
+   Gemini gets the notice + the reason library and returns
+   the best match in structured JSON
+            │
+            ▼
+   Guardrails (engine.js) check the answer against the library:
+   • reason not in the library?   • low confidence?
+   • status doesn't fit the reason?
+            │
+     ┌──────┴──────────────┐
+     ▼                     ▼
+ Library result        Safe fallback
+ (explanation, steps,  (read the exact remark, ask the
+  contact, link, letter) nodal officer / helpdesk)
 ```
 
-Optional: `GEMINI_MODEL` (default `gemini-2.5-flash`).
+If the AI service is unavailable, the app falls back to simple keyword matching against the same library and tells the student that this happened.
 
-## Tests
+The Gemini API key is read from a server-side environment variable. It is never sent to the browser and is not stored in this repository.
 
-```bash
-npm test
+## Honest limits
+
+- **Small by design:** 4 entries (3 specific reasons plus a fallback). Many real notices will get the fallback.
+- **Only as accurate as the library.** The AI picks from the library; it does not know the rules itself. The entries are hand-written and have not been reviewed by an official body. Corrections are welcome (see below).
+- **Rules vary** by scheme, year, state, and institute. Always check the official link and your nodal officer before acting.
+- **Not legal advice.** This is an explainer, not an official decision or a guarantee of any outcome.
+- **AI wording can vary.** The AI may rewrite the explanation and steps (for example, to translate them), so read the result against the official portal.
+- **Privacy:** please paste only the status and remark. Don't paste your name, Aadhaar number, application ID, phone number, or email. The page masks some sensitive patterns on your device, but you shouldn't rely on that alone.
+- Sample remarks shown on the page are illustrative.
+
+## Project structure
+
+```
+Rejection-decoder/
+├── index.html                 # Front-end page
+├── README.md
+└── Rejection-decoder/
+    ├── api/decode.js          # Vercel serverless function (Gemini call)
+    ├── engine.js              # Matching, status detection, guardrails
+    ├── logic.js               # Helpers (e.g. masking sensitive text)
+    ├── app.js                 # Front-end behaviour
+    ├── reasons.json           # The reason library
+    ├── *.test.js              # Automated tests (api, decoder, engine, logic)
+    ├── package.json
+    └── .gitignore
 ```
 
-Uses the built-in Node test runner, so there is nothing to install. No API key or network is needed, because the AI call is mocked.
+## Run it locally
 
-| File | What it checks |
-| --- | --- |
-| `tests/engine.test.js` | one realistic notice per reason reaches the right reason, vague notices do not match, a reason is never used for a status it does not allow, ties are treated as ambiguous, every guardrail on AI output, and the reason library itself (unique ids, https links, required fields) |
-| `tests/api.test.js` | wrong method, short or long input, unsupported language, API key sent in a header and not the URL, prompt injection cannot break out of the notice block, invented reason ids, AI errors, timeouts and bad JSON all fall back safely, no-cache header |
-| `tests/logic.test.js` | personal-data hiding, input validation, cache keys, link safety, response cleanup |
+1. Clone the repo
+   ```bash
+   git clone https://github.com/ShivaniAyyappan/Rejection-decoder.git
+   cd Rejection-decoder/Rejection-decoder
+   ```
+2. Install the Vercel CLI
+   ```bash
+   npm i -g vercel
+   ```
+3. Create a `.env` file (never commit it) with your own Gemini key:
+   ```
+   GEMINI_API_KEY=your_key_here
+   ```
+   Optional: `GEMINI_MODEL` to override the default model.
+4. Start the dev server
+   ```bash
+   vercel dev
+   ```
+5. Run the tests
+   ```bash
+   npm test
+   ```
 
-When you add a reason to `reasons.json`, add one realistic notice for it to the `CASES` list in `tests/engine.test.js`.
+Without a `GEMINI_API_KEY`, the API falls back to keyword matching.
 
-## Deploy
+## Contributing / correcting the library
 
-Import this repo in Vercel and add the `GEMINI_API_KEY` environment variable. No build step is needed.
+The most useful contribution is **correcting or adding reasons.** If you've been through NSP, or you work in a college scholarship office, please help.
 
-## Limits
+- Spot a wrong or outdated entry? [Open an issue](https://github.com/ShivaniAyyappan/Rejection-decoder/issues) with the entry, what's wrong, and a source (NSP guideline page, circular, or FAQ).
+- Want to add a reason? Open a pull request that edits `reasons.json` and includes a source link and the date you checked it.
 
-- Covers NSP-style scholarship notices only (7 reasons so far).
-- `reasons.json` is hand-written. Check the `last_checked` date before relying on it.
-- Not legal advice. Always confirm on the official portal.
-- Sample notices in the app are made up.
+## Tech
 
-## Roadmap
+- Front-end: HTML / CSS / JavaScript
+- Backend: Vercel serverless function (Node.js)
+- AI: Google Gemini, used to pick from the library and to translate wording, not as a source of facts
+- Tests: Node's built-in test runner
 
-Photo upload of notices, more schemes, more reasons, and RTI draft templates.
+## License
+
+MIT
+
+## Author
+
+Built by [Shivani Ayyappan](https://github.com/ShivaniAyyappan).
